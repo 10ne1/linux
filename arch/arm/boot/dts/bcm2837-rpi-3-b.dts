@@ -28,6 +28,35 @@
 		compatible = "mmc-pwrseq-simple";
 		reset-gpios = <&expgpio 1 GPIO_ACTIVE_LOW>;
 	};
+
+	soc {
+		vdd_3v3_reg: fixedregulator_3v3 {
+			compatible = "regulator-fixed";
+			regulator-name = "3v3";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			regulator-always-on;
+		};
+	};
+
+	sound {
+		compatible = "audio-graph-card";
+		label = "PCM5122 graph";
+		dais = <&cpu_port>;
+		status = "okay";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&audio_amplifier_pins>;
+		pa-gpios = <&gpio 4 0>;
+
+		widgets = "Speaker", "Speaker Out Jack";
+
+		routing =
+			"Amplifier", "OUTL",
+			"Amplifier", "OUTR",
+
+			"Speaker Out Jack", "Amplifier";
+	};
 };
 
 &firmware {
@@ -55,6 +84,55 @@
 
 &hdmi {
 	hpd-gpios = <&expgpio 4 GPIO_ACTIVE_LOW>;
+};
+
+&gpio {
+	audio_amplifier_pins: audio_amplifier_pins {
+		brcm,pins = <4>;
+		brcm,function = <1>;    // out
+	};
+};
+
+&alt0 {
+	brcm,pins = <5 7 8 9 10 11>;
+};
+
+&i2s {
+	#sound-dai-cells = <0>;
+	reg = <0x7e203000 0x24>;
+	clocks = <&clocks BCM2835_CLOCK_PCM>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pcm_gpio18>;
+	status = "okay";
+
+	cpu_port: port {
+		cpu_endpoint: endpoint {
+			remote-endpoint = <&codec_endpoint>;
+			dai-format = "i2s";
+		};
+	};
+};
+
+&i2c1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status	= "okay";
+
+	pcm5122@4c {
+		#sound-dai-cells = <0>;
+		compatible = "ti,pcm5122";
+		reg = <0x4c>;
+		AVDD-supply = <&vdd_3v3_reg>;
+		DVDD-supply = <&vdd_3v3_reg>;
+		CPVDD-supply = <&vdd_3v3_reg>;
+		status = "okay";
+
+		port {
+			codec_endpoint: endpoint {
+				remote-endpoint = <&cpu_endpoint>;
+			};
+		};
+	};
 };
 
 /* uart0 communicates with the BT module */
