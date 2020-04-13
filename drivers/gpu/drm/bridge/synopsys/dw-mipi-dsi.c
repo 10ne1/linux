@@ -571,13 +571,13 @@ static int dw_mipi_dsi_write(struct dw_mipi_dsi *dsi,
 		if (len < pld_data_bytes) {
 			word = 0;
 			memcpy(&word, tx_buf, len);
-			regmap_field_write(dsi->field_gen_payload,
-					   le32_to_cpu(word));
+			regmap_field_force_write(dsi->field_gen_payload,
+						 le32_to_cpu(word));
 			len = 0;
 		} else {
 			memcpy(&word, tx_buf, pld_data_bytes);
-			regmap_field_write(dsi->field_gen_payload,
-					   le32_to_cpu(word));
+			regmap_field_force_write(dsi->field_gen_payload,
+						 le32_to_cpu(word));
 			tx_buf += pld_data_bytes;
 			len -= pld_data_bytes;
 		}
