@@ -1012,6 +1012,7 @@ void flush_tlb_one_kernel(unsigned long addr)
 	 */
 	this_cpu_write(cpu_tlbstate.invalidate_other, true);
 }
+EXPORT_SYMBOL_GPL(flush_tlb_one_kernel);
 
 /*
  * Flush one page in the user mapping
@@ -1096,6 +1097,7 @@ void flush_tlb_local(void)
 {
 	__flush_tlb_local();
 }
+EXPORT_SYMBOL_GPL(flush_tlb_local);
 
 /*
  * Flush everything
